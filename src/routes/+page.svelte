@@ -17,10 +17,10 @@
     let speedIncrease = false
     let rateIncrease = false
     let problemInfo = {
-        0: {"operator": "+", "color": "#FFB3B3", "x": ADDITION_LANE},
-        1: {"operator": "-", "color": "#90C8AC", "x": SUBTRACTION_LANE},
-        2: {"operator": "*", "color": "#EEE4AB", "x": MULTIPLICATION_LANE},
-        3: {"operator": "/", "color": "#8CC0DE", "x": DIVISION_LANE},
+        0: {"operator": "+", "color": "red", "x": ADDITION_LANE},
+        1: {"operator": "-", "color": "green", "x": SUBTRACTION_LANE},
+        2: {"operator": "*", "color": "yellow", "x": MULTIPLICATION_LANE},
+        3: {"operator": "/", "color": "blue", "x": DIVISION_LANE},
     }
     let problems = []
 
