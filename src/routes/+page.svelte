@@ -20,7 +20,7 @@
         0: {"operator": "+", "color": "red", "x": ADDITION_LANE},
         1: {"operator": "-", "color": "green", "x": SUBTRACTION_LANE},
         2: {"operator": "*", "color": "yellow", "x": MULTIPLICATION_LANE},
-        3: {"operator": "/", "color": "blue", "x": DIVISION_LANE},
+        3: {"operator": "/", "color": "lightblue", "x": DIVISION_LANE},
     }
     let problems = []
 
