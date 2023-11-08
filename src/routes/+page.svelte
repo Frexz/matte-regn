@@ -14,13 +14,14 @@
     let answer
     let poeng = 0
     let gameStarted = false
+    let gameOver = false
     let speedIncrease = false
     let rateIncrease = false
     let problemInfo = {
-        0: {"operator": "+", "color": "red", "x": ADDITION_LANE},
-        1: {"operator": "-", "color": "green", "x": SUBTRACTION_LANE},
-        2: {"operator": "*", "color": "yellow", "x": MULTIPLICATION_LANE},
-        3: {"operator": "/", "color": "lightblue", "x": DIVISION_LANE},
+        0: {"operator": "+", "color": "#FF6969", "x": ADDITION_LANE},
+        1: {"operator": "-", "color": "#53BF9D", "x": SUBTRACTION_LANE},
+        2: {"operator": "*", "color": "#F7D060", "x": MULTIPLICATION_LANE},
+        3: {"operator": "/", "color": "#5272F2", "x": DIVISION_LANE},
     }
     let problems = []
 
@@ -68,7 +69,17 @@
         for (const problem of problems) {
             if (problem["y"] > HEIGHT - 50 + 3) {
                 clearInterval(interval)
-                gameStarted = false
+                
+                setTimeout(() => {
+                    gameOver = true
+                    problems = []
+                }, 2000);
+                
+                setTimeout(() => {
+                    gameOver = false
+                    gameStarted = false
+                    
+                }, 10000);
             }
         }
     }
@@ -132,14 +143,24 @@
 </script>
 
 <div class="content" style="--width: {WIDTH}px; --height: {HEIGHT}px;">
+    <h1>Poeng: {poeng}</h1>
     <div class="game-window">
+        {#if !gameStarted}
+            <h1 class="start-headline">Trykk ENTER for å starte</h1>
+            <p class="start-instructions">Skriv inn svar på regnestykkene og trykk ENTER. Er svaret riktig forsvinner regnestykket. Få så mange poeng som mulig før regnestykkene kommer til bunnen.</p>
+        {/if}
+        {#if gameOver}
+            <div class="game-over">
+                <h1 class="game-over-headline">Spillet er slutt</h1>
+                <p class="game-over-text">Du fikk {poeng} poeng</p>
+            </div>
+        {/if}
         {#each problems as problem}
             <p style="color: {problem["color"]}; left: {problem["x"]}px; top: {problem["y"]}px;">{problem["problem"]}</p>
         {/each}
         <hr>
     </div>
     <input class="game-input" type="number" autofocus on:keypress={(e) => handleKeypress(e)} bind:value={answer}>
-    <h1>Poeng: {poeng}</h1>
 </div>
 
 <style>
@@ -178,11 +199,43 @@
         width: var(--width);
     }
 
+    .game-over {
+        background-color: #F875AA;
+        border: 3px solid white;
+        border-radius: 10px;
+        height: 120px;
+        position: absolute;
+        left: 475px;
+        top: 175px;
+        width: 250px;
+    }
+
+    .game-over-headline {
+        text-align: center;
+    }
+
+    .game-over-text {
+        font-size: 20px;
+        width: 100%;
+    }
+
     .game-window {
-        background-color: black;
+        background-color: #171717;
         border: 5px solid lightslategrey;
         height: var(--height);
         position: relative;
+        width: var(--width);
+    }
+
+    .start-instructions {
+        color: #F875AA;
+        font-size: 12px;
+        width: var(--width)
+    }
+
+    .start-headline {
+        color: #F875AA;
+        text-align: center;
         width: var(--width);
     }
 </style>
