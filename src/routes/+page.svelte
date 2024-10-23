@@ -1,10 +1,11 @@
 <script>
     const WIDTH = 1200
-    const HEIGHT = 500
+    const HEIGHT = 700
     const ADDITION_LANE = 100
     const SUBTRACTION_LANE = 400
     const MULTIPLICATION_LANE = 700
     const DIVISION_LANE = 1000
+
     let timer = 0
     let animationSpeed = 10
     let moveLength = 0.5
@@ -24,6 +25,18 @@
         3: {"operator": "/", "color": "#5272F2", "x": DIVISION_LANE},
     }
     let problems = []
+    let highscoresDummy = {
+        "1": ["Bjørn", 32],
+        "2": ["Ulf", 30],
+        "3": ["Jerv", 30],
+        "4": ["Gåshild Gassesen", 27],
+        "5": ["Anna", 25],
+        "6": ["Varg", 22],
+        "7": [],
+        "8": [],
+        "9": [],
+        "10": [],
+    }
 
     $: {
         if (gameStarted) {
@@ -44,10 +57,7 @@
 
 
     function startGame() {
-        problems = []
-        moveLength = 0.5
-        poeng = 0
-        rate = 300
+        
         interval = setInterval(() => {
             checkGameOver()
             checkSpeedIncreaseAndRate(poeng)
@@ -78,6 +88,10 @@
                 setTimeout(() => {
                     gameOver = false
                     gameStarted = false
+                    poeng = 0
+                    problems = []
+                    moveLength = 0.5
+                    rate = 300
                     
                 }, 10000);
             }
@@ -142,25 +156,44 @@
     }
 </script>
 
-<div class="content" style="--width: {WIDTH}px; --height: {HEIGHT}px;">
-    <h1>Poeng: {poeng}</h1>
-    <div class="game-window">
-        {#if !gameStarted}
-            <h1 class="start-headline">Trykk ENTER for å starte</h1>
-            <p class="start-instructions">Skriv inn svar på regnestykkene og trykk ENTER. Er svaret riktig forsvinner regnestykket. Få så mange poeng som mulig før regnestykkene kommer til bunnen.</p>
-        {/if}
-        {#if gameOver}
-            <div class="game-over">
-                <h1 class="game-over-headline">Spillet er slutt</h1>
-                <p class="game-over-text">Du fikk {poeng} poeng</p>
-            </div>
-        {/if}
-        {#each problems as problem}
-            <p style="color: {problem["color"]}; left: {problem["x"]}px; top: {problem["y"]}px;">{problem["problem"]}</p>
-        {/each}
-        <hr>
+<div class="content" >
+    <div class="game" style="--width: {WIDTH}px; --height: {HEIGHT}px;">
+        <h1>Poeng: {poeng}</h1>
+        <div class="game-window">
+            {#if !gameStarted}
+                <h1 class="start-headline">Trykk ENTER for å starte</h1>
+                <p class="start-instructions">Skriv inn svar på regnestykkene og trykk ENTER. Er svaret riktig forsvinner regnestykket. Få så mange poeng som mulig før regnestykkene kommer til bunnen.</p>
+            {/if}
+            {#if gameOver}
+                <div class="game-over">
+                    <h1 class="game-over-headline">Spillet er slutt</h1>
+                    <p class="game-over-text">Du fikk {poeng} poeng</p>
+                </div>
+            {/if}
+            {#each problems as problem}
+                <p style="color: {problem["color"]}; left: {problem["x"]}px; top: {problem["y"]}px;">{problem["problem"]}</p>
+            {/each}
+            <hr>
+        </div>
+        <input class="game-input" type="number" autofocus on:keypress={(e) => handleKeypress(e)} bind:value={answer}>
     </div>
-    <input class="game-input" type="number" autofocus on:keypress={(e) => handleKeypress(e)} bind:value={answer}>
+
+    <div class="highscore-list" style="--height: {HEIGHT}px;">
+        <div class="highscore-head">
+            <h1>~*~ Topp 10 ~*~</h1>
+        </div>
+        <div class="entries">
+            <p><b>#</b></p>
+            <p><b>Navn</b></p>
+            <p style="text-align: right;"><b>Poeng</b></p>
+
+            {#each Object.keys(highscoresDummy) as key}
+                <p>{key}.</p>
+                <p>{highscoresDummy[key][0] || ""}</p>
+                <p style="text-align: right;">{highscoresDummy[key][1] || ""}</p>
+            {/each}
+        </div>
+    </div>
 </div>
 
 <style>
@@ -170,7 +203,7 @@
         margin: 0;
         position: absolute;
         width: var(--width);
-        top: 480px;
+        top: 680px;
     }
 
     p {
@@ -184,11 +217,18 @@
 
     .content {
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
         align-items: center;
         justify-content: center;
         height: 100vh;
         width: 100vw;
+    }
+
+    .game {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
     }
 
     .game-input {
@@ -222,15 +262,49 @@
     .game-window {
         background-color: #171717;
         border: 5px solid lightslategrey;
+        border-radius: 7px;
         height: var(--height);
         position: relative;
         width: var(--width);
     }
 
+    .highscore-head {
+        display: flex;
+        justify-content: center;
+        height: 0px;
+        margin-bottom: 100px;
+    }
+
+    .highscore-list {
+        display: flex;
+        flex-direction: column;
+        height: var(--height);
+        width: 20vw;
+        padding-left: 50px;
+    }
+
+    .entries {
+        display: grid;
+        grid-template-columns: 1fr 2fr 1fr;
+        grid-row: repeat(11, auto);
+        row-gap: 10px;
+        column-gap: 10px;
+        width: 100%;
+        text-align: left;
+    }
+
+    .entries p {
+        position: relative;
+        margin: 0;
+        font-size: 20px;
+        width: 100%;
+        text-align: left;
+    }
+
     .start-instructions {
         color: #F875AA;
         font-size: 12px;
-        width: var(--width)
+        width: var(--width);
     }
 
     .start-headline {
