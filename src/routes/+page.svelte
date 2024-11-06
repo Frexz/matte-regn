@@ -1,4 +1,6 @@
 <script>
+    import { onMount, tick } from "svelte"
+
     const WIDTH = 1200
     const HEIGHT = 700
     const ADDITION_LANE = 100
@@ -14,28 +16,42 @@
     let interval
     let answer
     let poeng = 0
+    let name
+
     let gameStarted = false
     let gameOver = false
     let speedIncrease = false
     let rateIncrease = false
+
     let problemInfo = {
         0: {"operator": "+", "color": "#FF6969", "x": ADDITION_LANE},
         1: {"operator": "-", "color": "#53BF9D", "x": SUBTRACTION_LANE},
         2: {"operator": "*", "color": "#F7D060", "x": MULTIPLICATION_LANE},
         3: {"operator": "/", "color": "#5272F2", "x": DIVISION_LANE},
     }
+
     let problems = []
-    let highscoresDummy = {
-        "1": ["Bjørn", 32],
-        "2": ["Ulf", 30],
-        "3": ["Jerv", 30],
-        "4": ["Gåshild Gassesen", 27],
-        "5": ["Anna", 25],
-        "6": ["Varg", 22],
-        "7": [],
-        "8": [],
-        "9": [],
-        "10": [],
+    let highscores = []
+
+    let gameInput
+    let highscoreInput
+
+    onMount(() => {
+        gameInput.focus()
+        if (typeof window !== "undefined") {
+            const savedScores = localStorage.getItem("highscores")
+            if (savedScores) {
+                highscores = JSON.parse(savedScores)
+        }
+        }
+        
+    })
+
+
+    $: {
+        if (gameOver) {
+            highscoreInput?.focus()
+        }
     }
 
     $: {
@@ -53,7 +69,6 @@
             rateIncrease = true
         }
     }
-
 
 
     function startGame() {
@@ -79,28 +94,32 @@
         for (const problem of problems) {
             if (problem["y"] > HEIGHT - 50 + 3) {
                 clearInterval(interval)
+                gameOver = true
                 
-                setTimeout(() => {
-                    gameOver = true
-                    problems = []
-                }, 2000);
-                
-                setTimeout(() => {
-                    gameOver = false
-                    gameStarted = false
-                    poeng = 0
-                    problems = []
-                    moveLength = 0.5
-                    rate = 300
-                    
-                }, 10000);
             }
+        }
+    }
+
+    function saveHighscores() {
+        if (typeof window !== "undefined") {
+        localStorage.setItem("highscores", JSON.stringify(highscores))
         }
     }
 
     function handleKeypress(e) {
         if (e.keyCode == 13 && !gameStarted) {
             gameStarted = true
+        } else if (e.keyCode == 13 && gameOver) {
+            highscores = [[name, poeng], ...highscores].sort((a, b) => {return b[1] - a[1]}).slice(0, 10)
+            saveHighscores()
+            name = ""
+            gameOver = false
+            gameStarted = false
+            poeng = 0
+            problems = []
+            moveLength = 0.5
+            rate = 300
+            gameInput.focus()
         } else if (e.keyCode == 13) {
             checkAnswer(answer)
             answer = ""
@@ -116,7 +135,7 @@
         problems = problems.filter((element) => element["answer"] != answer)
     }
 
-    function checkSpeedIncreaseAndRate(poeng) {
+    function checkSpeedIncreaseAndRate() {
         if (speedIncrease) {
             moveLength += 0.1
             speedIncrease = false
@@ -154,6 +173,7 @@
             })
         }
     }
+
 </script>
 
 <div class="content" >
@@ -168,6 +188,7 @@
                 <div class="game-over">
                     <h1 class="game-over-headline">Spillet er slutt</h1>
                     <p class="game-over-text">Du fikk {poeng} poeng</p>
+                    <input type="text" placeholder="Skriv inn navet ditt her og trykk ENTER" style="margin-top: 50px; width: 97%;" bind:this={highscoreInput} on:keypress={(e) => handleKeypress(e)} bind:value={name}>
                 </div>
             {/if}
             {#each problems as problem}
@@ -175,7 +196,7 @@
             {/each}
             <hr>
         </div>
-        <input class="game-input" type="number" autofocus on:keypress={(e) => handleKeypress(e)} bind:value={answer}>
+        <input class="game-input" type="number" on:keypress={(e) => handleKeypress(e)} bind:value={answer} bind:this={gameInput}>
     </div>
 
     <div class="highscore-list" style="--height: {HEIGHT}px;">
@@ -187,10 +208,10 @@
             <p><b>Navn</b></p>
             <p style="text-align: right;"><b>Poeng</b></p>
 
-            {#each Object.keys(highscoresDummy) as key}
-                <p>{key}.</p>
-                <p>{highscoresDummy[key][0] || ""}</p>
-                <p style="text-align: right;">{highscoresDummy[key][1] || ""}</p>
+            {#each highscores.sort((a, b) => {return b[1] - a[1]}).slice(0, 10) as entry, i}
+                <p>{i + 1}.</p>
+                <p>{entry[0] || ""}</p>
+                <p style="text-align: right;">{entry[1] || ""}</p>
             {/each}
         </div>
     </div>
@@ -243,11 +264,13 @@
         background-color: #F875AA;
         border: 3px solid white;
         border-radius: 10px;
-        height: 120px;
+        height: 200px;
         position: absolute;
+        padding: 5px;
         left: 475px;
         top: 175px;
-        width: 250px;
+        width: 300px;
+        z-index: 10;
     }
 
     .game-over-headline {
@@ -266,6 +289,7 @@
         height: var(--height);
         position: relative;
         width: var(--width);
+        z-index: 1;
     }
 
     .highscore-head {
